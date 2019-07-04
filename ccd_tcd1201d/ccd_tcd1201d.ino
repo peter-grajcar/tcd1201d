@@ -93,17 +93,12 @@ inline void readHigh() {
     PORTB = (0 << RS) | (1 << BT) | (1 << PHI2) | (0 << PHI1) | (0 << SH);
 }
 
-void insert(int value) {
+inline void insert(int value) {
     int byte_index = 10 * data_index / 8;
     int byte_offset = 10 * data_index % 8;
 
-    /* 8 high bits */
-    byte high = (value & 0x3FC) >> 2;
-    /* 8 low bits */
-    byte low = value & 0x0FF; 
-
-    ccd_data[byte_index]     |= high >>  byte_offset;
-    ccd_data[byte_index + 1] |= low  << (6 - byte_offset);
+    ccd_data[byte_index]     |= (value & 0x3FC) >> (2 + byte_offset);
+    ccd_data[byte_index + 1] |= (value & 0x0FF) << (6 - byte_offset);
 
     data_index++;
 }
@@ -112,9 +107,9 @@ int extract(int i) {
     int byte_index = 10 * i / 8;
     int byte_offset = 10 * i % 8;
 
-    byte high = ccd_data[byte_index]     <<  byte_offset;
+    byte high = ccd_data[byte_index]     << (2 + byte_offset);
     byte low =  ccd_data[byte_index + 1] >> (6 - byte_offset);
-    int value = (high << 2) | low;
+    int value = high | low;
     
     return value;
 }
